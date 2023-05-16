@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using static ConsoleApp3.Exercicio02;
 
@@ -13,13 +14,116 @@ namespace ConsoleApp3
     //  as açoes devem ser feitas pelo usuario pegando os dados do console sendo elas criar, listar, buscar por id, editar, remover
     public class Exercicio02
     {
+        public static bool CriacaoPokemon(List<Pokemon> pokemons)
+        {
+
+            Random randNum = new Random();
+            Pokemon pokemon = new Pokemon();
+
+            Console.WriteLine("Informe um nome para o pokemon");
+            string name = Console.ReadLine();
+
+            var nameAlreadyInUse = pokemons.FirstOrDefault(pokemon => pokemon.Name.Contains(name));
+
+            if (nameAlreadyInUse is not null)
+            {
+                Console.WriteLine("Pokemon já existe. Voltando ao menu...");
+                return false;
+            }
+            pokemon.Name = name;
+            pokemon.Id = randNum.Next(1000);
+            pokemons.Add(pokemon);
+            return true;
+            
+        }
+
+        public static void ListarPokemon(List<Pokemon> pokemons)
+        {
+            foreach (Pokemon pokemon in pokemons)
+            {
+                Console.WriteLine(pokemon);
+            }
+
+        }
+
+        public static bool EditarPokemon(List<Pokemon> pokemons)
+        {
+            Console.WriteLine("Informe o ID do pokemon que deseja editar: ");
+            int idPokemonEditar = int.Parse(Console.ReadLine());
+
+            var pokemonExist = pokemons.FirstOrDefault(pokemon => pokemon.Id == idPokemonEditar);
+
+            if (pokemonExist is null)
+            {
+                Console.WriteLine("Pokemon não encontrado. Voltando ao menu");
+                return false;
+            }
+
+            Console.WriteLine("Informe o novo nome do pokemon");
+            string pokemonName = Console.ReadLine();
+
+            var nameAlreadyInUse = pokemons.FirstOrDefault(pokemon => pokemon.Name.Contains(pokemonName));
+
+            if (nameAlreadyInUse is null)
+            {
+                pokemonExist.Name = pokemonName;
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Nome do pokemon já existe. Voltando ao menu");
+                return false;
+            }
+
+        }
+
+        public static bool RemoverPokemon(List<Pokemon> pokemons)
+        {
+            Console.WriteLine("Informe o ID do pokemon que deseja remover: ");
+            int idPokemonRemover = int.Parse(Console.ReadLine());
+
+            var pokemonExist = pokemons.FirstOrDefault(pokemon => pokemon.Id == idPokemonRemover);
+
+            if (pokemonExist is null)
+            {
+                Console.WriteLine("Pokemon não encontrado. Voltando ao menu");
+                return false;
+            }
+
+            pokemons.Remove(pokemonExist);
+            return true;
+          
+        }
+
+
+        public static bool BuscarPokemon(List<Pokemon> pokemons)
+        {
+            Console.WriteLine("Informe o nome do pokemon que deseja procurar: ");
+            string pokemonBuscado = Console.ReadLine();
+
+            var pokemonExist = pokemons.FirstOrDefault(pokemon => pokemon.Name.Contains(pokemonBuscado));
+
+            if(pokemonExist is null)
+            {
+                Console.WriteLine("Pokemon não encontrado. Voltando ao menu");
+                return false;
+            }
+
+            Console.WriteLine(pokemonExist);
+            return true;
+
+        }
+            
+           
+        
+
+
+
+
         public static void Executar()
         {
             List<Pokemon> pokemons = new List<Pokemon>();
-            Pokemon pokemon = new Pokemon();
 
-
-            Random randNum = new Random();
 
             string sair = string.Empty;
 
@@ -38,103 +142,72 @@ namespace ConsoleApp3
 
                 int option = int.Parse(Console.ReadLine());
 
-                //CRIAR
                 if (option == 1)
                 {
-                    pokemon = new Pokemon();
-                    Console.WriteLine("Informe um nome para o pokemon");
-                    string name = Console.ReadLine();
-
-                    bool existe = false;
-
-                    foreach(Pokemon namePokemon in pokemons)
+                   bool isCreateSuccess = CriacaoPokemon(pokemons);
+                   if(isCreateSuccess == false)
                     {
-                        existe = namePokemon.Name.Contains(name);
-
-                        if (existe)
-                        {
-                            Console.WriteLine(" O pokemon já existe. Voltando ao menu...");
-                            sair = "S";
-                           
-                        }
+                        continue;
                     }
 
-                    if (existe == false)
-                    {
-                        pokemon.Name = name;
-                        pokemon.Id = randNum.Next(1000);
-                        pokemons.Add(pokemon);
-                        Console.WriteLine("Pokemon criado com sucesso! Deseja voltar ao menu? S/N");
-                        sair = Console.ReadLine().ToUpper();
-                    }
-                   
+                    Console.WriteLine("Pokemon criado com sucesso! Deseja voltar ao menu? S/N");
+                    sair = Console.ReadLine().ToUpper();
+
                 }
-                // VER LISTA
+
                 else if (option == 2)
                 {
-
-                    foreach (Pokemon item in pokemons)
-                    {
-                        Console.WriteLine(item);
-                    }
-
+                    ListarPokemon(pokemons);
                     Console.WriteLine("Deseja voltar ao menu? S/N");
                     sair = Console.ReadLine().ToUpper();
 
                 } 
-                // EDITAR
+              
                 else if(option == 3)
                 {
-                    Console.WriteLine("Informe o ID do pokemon que deseja editar: ");
-                    int idPokemonEditar = int.Parse(Console.ReadLine());
-
-                    foreach(Pokemon item in pokemons)
+                   
+                   bool isEditSuccess = EditarPokemon(pokemons);
+                    if(isEditSuccess == false)
                     {
-                        if(pokemon.Id == idPokemonEditar)
-                        {
-                            Console.WriteLine("Informe o novo nome do pokemon: ");
-                            pokemon.Name = Console.ReadLine();
-                        }
-                    } 
+                        continue;
+                    }
 
-                    Console.WriteLine("Pokemon editado com sucesso! Deseja voltar ao menu? S/N");
+                    Console.WriteLine("Pokemon editado com sucesso. Deseja voltar ao menu? S/N");
                     sair = Console.ReadLine().ToUpper();
+
+
                 }
-                // REMOVER
+                
                 else if(option == 4)
                 {
-                    Console.WriteLine("Informe o ID do pokemon que deseja remover: ");
-                    int idPokemonRemover = int.Parse(Console.ReadLine());
+                    bool isCreateSuccess =  RemoverPokemon(pokemons);
 
-                    pokemons = pokemons.Where(p => p.Id != idPokemonRemover).ToList();
+                    if (isCreateSuccess == false)
+                    {
+                        continue;
+                    }
 
-                    Console.WriteLine("Pokemon removido com sucesso! Deseja voltar ao menu? S/N");
+                    Console.WriteLine("Pokemon removido com sucesso. Dseja voltar ao menu? S/N");
                     sair = Console.ReadLine().ToUpper();
                 }
                 else if (option == 5)
                 {
-                    Console.WriteLine("Informe o nome do pokemon que deseja procurar: ");
-                    string pokemonBuscado = Console.ReadLine();
+                    bool isCreateSuccess = BuscarPokemon(pokemons);
 
-                    bool existe = false;
-
-                    foreach(Pokemon namePokemon in pokemons)
+                    if(isCreateSuccess == false)
                     {
-                        existe = namePokemon.Name.Contains(pokemonBuscado);
-
-                        if (existe)
-                        {
-                            Console.WriteLine(namePokemon);
-                        }
+                        continue;
                     }
+
                     Console.WriteLine("Deseja voltar ao menu? S/N");
                     sair = Console.ReadLine().ToUpper();
-                }
-                else
+
+                } else
                 {
-                    Console.WriteLine("Opção invalida");
+                    Console.WriteLine("Opção invalida. voltando ao menu");
                     sair = "S";
                 }
+
 
             } while (sair == "S");
 
@@ -151,7 +224,5 @@ namespace ConsoleApp3
             }
 
         }
-
-
     }
 }
